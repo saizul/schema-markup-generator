@@ -1,5 +1,7 @@
 # Schema Markup Generator
 
+[![CI](https://github.com/saizul/schema-markup-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/saizul/schema-markup-generator/actions/workflows/ci.yml) ![JavaScript](https://img.shields.io/badge/JavaScript-ready-blue?logo=javascript&logoColor=white) ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg) [![Live demo](https://img.shields.io/badge/demo-live-8b5cf6)](https://saizul.github.io/schema-markup-generator/)
+
 A free, open-source JSON-LD generator for structured data. Pick a schema type, fill in the form, and get valid
 markup that updates as you type. No build step, no dependencies, no tracking: plain HTML, CSS and ES modules.
 
