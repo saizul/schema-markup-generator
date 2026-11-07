@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schema Markup Generator - JSON-LD for Google</title>
+  <meta name="description" content="Free, open-source JSON-LD schema markup generator. Article, FAQ, LocalBusiness, Product, Recipe, JobPosting, Event, @graph mode and more.">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    try {
+      var th = localStorage.getItem('schema-markup-generator:theme');
+      if (th === 'dark' || th === 'light') document.documentElement.dataset.theme = th;
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip" href="#form" data-i18n="skip">Skip to the form</a>
+  <header class="top">
+    <div>
+      <h1 data-i18n="app.title">Schema Markup Generator</h1>
+      <p class="sub" data-i18n="app.subtitle">Build valid JSON-LD structured data for Google and other search engines.</p>
+    </div>
+    <div class="top-actions">
+      <label class="inline"><span class="sr-only" data-i18n="lang.toggle">Language</span>
+        <select id="lang" aria-label="Language">
+          <option value="en">English</option>
+          <option value="bn">বাংলা</option>
+        </select>
+      </label>
+      <button type="button" id="theme" class="btn" aria-label="Toggle dark and light theme" data-i18n-aria="theme.toggle">
+        <span aria-hidden="true" id="theme-icon">◐</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel" aria-labelledby="builder-h">
+      <h2 id="builder-h" class="sr-only">Builder</h2>
+
+      <div class="toolbar">
+        <fieldset class="seg">
+          <legend data-i18n="mode.label">Mode</legend>
+          <label><input type="radio" name="mode" value="single"> <span data-i18n="mode.single">Single schema</span></label>
+          <label><input type="radio" name="mode" value="graph"> <span data-i18n="mode.graph">Combined graph</span></label>
+        </fieldset>
+        <label class="grow"><span data-i18n="template.label">Start from a template</span>
+          <select id="template"></select>
+        </label>
+        <button type="button" id="import-open" class="btn" data-i18n="import.open">Import / extract</button>
+      </div>
+
+      <div id="graph-bar" class="graph-bar" hidden>
+        <label class="wide"><span data-i18n="graph.base">Site base URL</span>
+          <input id="graph-base" type="url" inputmode="url" spellcheck="false" placeholder="https://example.com/">
+        </label>
+        <p class="help" data-i18n="graph.help"></p>
+        <h3 id="entities-h" data-i18n="graph.entities">Entities in the graph</h3>
+        <ul id="entity-list" class="entities" aria-labelledby="entities-h"></ul>
+        <div class="add-entity">
+          <label class="sr-only" for="entity-type" data-i18n="graph.add">Add entity</label>
+          <select id="entity-type"></select>
+          <button type="button" id="entity-add" class="btn" data-i18n="graph.add">Add entity</button>
+        </div>
+      </div>
+
+      <div id="type-bar" class="type-bar">
+        <label><span data-i18n="type.label">Schema type</span>
+          <select id="type"></select>
+        </label>
+        <a id="docs-link" class="link" target="_blank" rel="noopener noreferrer" href="#" hidden>Google documentation</a>
+      </div>
+      <p id="note" class="note" hidden></p>
+
+      <form id="form" class="form" novalidate autocomplete="off"></form>
+    </section>
+
+    <section class="panel out-panel" aria-labelledby="out-h">
+      <h2 id="out-h" data-i18n="out.title">JSON-LD output</h2>
+      <div class="toolbar">
+        <button type="button" id="copy" class="btn primary" data-i18n="out.copy">Copy</button>
+        <button type="button" id="download" class="btn" data-i18n="out.download">Download .json</button>
+        <button type="button" id="share" class="btn" data-i18n="out.share">Copy share link</button>
+        <label class="check"><input type="checkbox" id="wrap"> <span data-i18n="out.wrap">Wrap in &lt;script&gt; tag</span></label>
+      </div>
+      <pre class="code" tabindex="0" aria-label="JSON-LD"><code id="out"></code></pre>
+      <p id="out-empty" class="help" data-i18n="out.empty" hidden>Fill in the form to generate markup.</p>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <div class="links">
+        <a class="btn" target="_blank" rel="noopener noreferrer" href="https://search.google.com/test/rich-results" data-i18n="out.rich">Test in Google Rich Results Test</a>
+        <a class="btn" target="_blank" rel="noopener noreferrer" href="https://validator.schema.org/" data-i18n="out.validator">Schema.org validator</a>
+      </div>
+      <p class="help" data-i18n="out.richHint"></p>
+      <h3 data-i18n="check.title">Checks</h3>
+      <div id="checks" class="checks"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span data-i18n="footer.made">Open source (MIT). Built by</span>
+    <a href="https://saizul.com" target="_blank" rel="noopener">Saizul Amin</a>
+  </footer>
+
+  <dialog id="import-dialog" aria-labelledby="import-h">
+    <form method="dialog" id="import-form">
+      <h2 id="import-h" data-i18n="import.title">Import existing markup</h2>
+      <p class="help" data-i18n="import.help"></p>
+      <label class="sr-only" for="import-text" data-i18n="import.title">Import existing markup</label>
+      <textarea id="import-text" rows="12" spellcheck="false" placeholder='{"@context":"https://schema.org","@type":"Organization"}'></textarea>
+      <p id="import-msg" class="status" role="status" aria-live="polite"></p>
+      <div class="dialog-actions">
+        <button type="button" id="import-cancel" class="btn" data-i18n="import.cancel">Cancel</button>
+        <button type="submit" id="import-go" class="btn primary" data-i18n="import.action">Import</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

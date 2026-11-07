@@ -1,0 +1,10 @@
+{
+  "name": "schema-markup-generator",
+  "version": "1.0.0",
+  "description": "Zero-build JSON-LD structured data generator for common schema.org types.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Saizul Amin (https://saizul.com)",
+  "scripts": { "test": "node --test" },
+  "private": true
+}
