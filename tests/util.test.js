@@ -75,6 +75,24 @@ test('toScriptTag wraps JSON in a ld+json script', () => {
   assert.ok(s.endsWith('\n</script>'));
   assert.equal(toJson({ a: 1 }), '{\n  "a": 1\n}');
 });
+test('toJson minify produces single-line JSON that parses back identically', () => {
+  const o = { a: 1, b: { c: ['x', 'y'] } };
+  const m = toJson(o, { minify: true });
+  assert.equal(m, '{"a":1,"b":{"c":["x","y"]}}');
+  assert.deepEqual(JSON.parse(m), o);
+});
+test('toScriptTag minify has no whitespace around the body', () => {
+  assert.equal(toScriptTag({ a: 1 }, { minify: true }), '<script type="application/ld+json">{"a":1}</script>');
+});
+test('toScriptTag escapes </script> in text and stays valid JSON', () => {
+  const o = { name: 'x</script><script>alert(1)</script>' };
+  for (const minify of [false, true]) {
+    const s = toScriptTag(o, { minify });
+    assert.equal(s.split('</script>').length, 2);
+    const body = s.replace(/^<script[^>]*>/, '').replace(/<\/script>$/, '');
+    assert.deepEqual(JSON.parse(body), o);
+  }
+});
 test('nonEmptyRows filters rows by keys', () => {
   assert.equal(nonEmptyRows([{ a: '', b: '' }, { a: 'x', b: '' }], ['a', 'b']).length, 1);
 });

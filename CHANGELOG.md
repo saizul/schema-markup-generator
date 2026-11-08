@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- "Minify output" toggle for the copied and downloaded JSON-LD (single line, no whitespace).
+
+### Fixed
+- `</script>` inside field text can no longer close the generated script tag early (`</` is escaped as `<\/`).
+
 ## [1.0.0]
 
 ### Added

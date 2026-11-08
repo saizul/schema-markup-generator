@@ -133,9 +133,19 @@ export function validate(fields, values, prefix = '') {
 }
 
 // ---- output ---------------------------------------------------------------
-export const toJson = (obj) => JSON.stringify(obj, null, 2);
-export const toScriptTag = (obj) =>
-  `<script type="application/ld+json">\n${toJson(obj)}\n</script>`;
+/** Serialises to JSON; pass `{ minify: true }` for a single-line, whitespace-free document. */
+export const toJson = (obj, { minify = false } = {}) =>
+  minify ? JSON.stringify(obj) : JSON.stringify(obj, null, 2);
+/**
+ * Wraps the document in a JSON-LD script tag. "</" is escaped as "<\/" (still valid JSON) so
+ * user text such as "</script>" cannot close the tag early.
+ */
+export const toScriptTag = (obj, opts = {}) => {
+  const body = toJson(obj, opts).replace(/<\//g, '<\\/');
+  return opts.minify
+    ? `<script type="application/ld+json">${body}</script>`
+    : `<script type="application/ld+json">\n${body}\n</script>`;
+};
 
 // ---- shared field groups --------------------------------------------------
 export const addressFields = [

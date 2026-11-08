@@ -65,5 +65,6 @@
  * @property {Object<string, Object>} values   Values per schema id (single mode).
  * @property {{base: string, entities: GraphEntity[], active: number}} graph
  * @property {boolean} wrap
+ * @property {boolean} minify
  */
 export {};

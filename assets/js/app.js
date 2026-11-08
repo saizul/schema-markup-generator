@@ -21,7 +21,7 @@ const store = {
 /** @returns {import('./types.js').AppState} */
 const fresh = () => ({
   lang: (navigator.language || '').startsWith('bn') ? 'bn' : 'en',
-  mode: 'single', type: 'article', values: {}, graph: { base: '', entities: [], active: 0 }, wrap: true,
+  mode: 'single', type: 'article', values: {}, graph: { base: '', entities: [], active: 0 }, wrap: true, minify: false,
 });
 
 function sanitize(s) {
@@ -38,6 +38,7 @@ function sanitize(s) {
   if (out.mode !== 'graph') out.mode = 'single';
   out.lang = out.lang === 'bn' ? 'bn' : 'en';
   out.wrap = out.wrap !== false;
+  out.minify = out.minify === true;
   return out;
 }
 
@@ -95,6 +96,7 @@ function renderChrome() {
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
   $('#lang').value = state.lang;
   $('#wrap').checked = state.wrap;
+  $('#minify').checked = state.minify;
   document.querySelectorAll('input[name="mode"]').forEach((r) => { r.checked = r.value === state.mode; });
 
   const tpl = $('#template');
@@ -251,7 +253,7 @@ function update() {
   const fieldErrorMap = validate(schema.fields, values);
   const { json, entityIssues, fieldErrors } = compute();
   const empty = isEmpty(json);
-  $('#out').textContent = empty ? '' : state.wrap ? toScriptTag(json) : toJson(json);
+  $('#out').textContent = empty ? '' : state.wrap ? toScriptTag(json, { minify: state.minify }) : toJson(json, { minify: state.minify });
   $('#out-empty').hidden = !empty;
   $('#download').disabled = $('#copy').disabled = $('#share').disabled = false;
 
@@ -404,6 +406,7 @@ $('#template').addEventListener('change', (e) => {
 });
 
 $('#wrap').addEventListener('change', (e) => { state.wrap = e.target.checked; update(); });
+$('#minify').addEventListener('change', (e) => { state.minify = e.target.checked; update(); });
 $('#lang').addEventListener('change', (e) => { state.lang = e.target.value; renderAll(); });
 
 $('#copy').addEventListener('click', async () => {
@@ -419,7 +422,7 @@ $('#download').addEventListener('click', () => {
   showAll = true;
   const json = update();
   const name = state.mode === 'graph' ? 'graph' : state.type;
-  const a = h('a', { download: `schema-${name}.json`, href: URL.createObjectURL(new Blob([toJson(json)], { type: 'application/json' })) });
+  const a = h('a', { download: `schema-${name}.json`, href: URL.createObjectURL(new Blob([toJson(json, { minify: state.minify })], { type: 'application/json' })) });
   document.body.append(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
