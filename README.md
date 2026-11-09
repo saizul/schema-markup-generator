@@ -16,7 +16,7 @@ The included workflow (`.github/workflows/ci.yml`) can also run the tests and de
 ## Features
 
 - **19 schema types**: Article / BlogPosting / NewsArticle, FAQPage, LocalBusiness (opening hours, geo, sameAs),
-  Organization, Person, Product (offers, aggregateRating), BreadcrumbList, HowTo, Event, WebSite with SearchAction,
+  Organization, Person, Product (offers, shipping details, return policy, aggregateRating), BreadcrumbList, HowTo, Event, WebSite with SearchAction,
   WebPage, Recipe, JobPosting, Course, VideoObject, SoftwareApplication, Review, Service and Dataset.
 - **Combined `@graph` mode**: build Organization + WebSite + WebPage + BreadcrumbList + Article (and more) in one
   document. Entities are linked automatically with `@id` references (WebSite publisher, WebPage isPartOf/breadcrumb,

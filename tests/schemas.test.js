@@ -118,6 +118,57 @@ test('product: round trip', () => {
   assert.equal(v.availability, 'OutOfStock'); assert.equal(v.condition, 'NewCondition'); assert.equal(v.price, '5');
 });
 
+test('product: merchant listing shipping details and return policy', () => {
+  const j = build('product', {
+    name: 'P', price: '20', currency: 'USD', shippingRate: '0', shippingCurrency: 'USD', shippingCountry: 'BD',
+    handlingMin: '0', handlingMax: '1', transitMin: '2', transitMax: '5',
+    returnCategory: 'MerchantReturnFiniteReturnWindow', returnDays: '30', returnCountry: 'BD',
+    returnMethod: 'ReturnByMail', returnFees: 'FreeReturn',
+  });
+  const sd = j.offers.shippingDetails;
+  assert.equal(sd['@type'], 'OfferShippingDetails');
+  assert.deepEqual(sd.shippingRate, { '@type': 'MonetaryAmount', value: 0, currency: 'USD' });
+  assert.deepEqual(sd.shippingDestination, { '@type': 'DefinedRegion', addressCountry: 'BD' });
+  assert.deepEqual(sd.deliveryTime.handlingTime, { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' });
+  assert.equal(sd.deliveryTime.transitTime.maxValue, 5);
+  const rp = j.offers.hasMerchantReturnPolicy;
+  assert.equal(rp['@type'], 'MerchantReturnPolicy');
+  assert.equal(rp.returnPolicyCategory, 'https://schema.org/MerchantReturnFiniteReturnWindow');
+  assert.equal(rp.merchantReturnDays, 30);
+  assert.equal(rp.returnMethod, 'https://schema.org/ReturnByMail');
+  assert.equal(rp.returnFees, 'https://schema.org/FreeReturn');
+});
+test('product: shipping and return objects are omitted when their fields are empty', () => {
+  const j = build('product', { name: 'P', price: '5', currency: 'USD' });
+  assert.equal(j.offers.shippingDetails, undefined);
+  assert.equal(j.offers.hasMerchantReturnPolicy, undefined);
+  assert.equal(build('product', { name: 'P', price: '5', currency: 'USD', transitMax: '3' }).offers.shippingDetails.deliveryTime.transitTime.minValue, undefined);
+});
+test('product: shipping and return round trip', () => {
+  const v0 = { name: 'P', shippingRate: '4.5', shippingCurrency: 'EUR', shippingCountry: 'DE', handlingMin: '1', handlingMax: '2',
+    transitMin: '3', transitMax: '4', returnCategory: 'MerchantReturnNotPermitted', returnCountry: 'DE' };
+  const v = byId('product').parse(build('product', v0));
+  for (const [k, val] of Object.entries(v0)) assert.equal(v[k], val, k);
+});
+test('product: parse accepts array-valued offers, shipping details and a fixed-value transit time', () => {
+  const v = byId('product').parse({ '@type': 'Product', name: 'P', offers: [{ shippingDetails: [{ shippingRate: { value: 3, currency: 'USD' },
+    deliveryTime: { transitTime: { '@type': 'QuantitativeValue', value: 2 } } }], hasMerchantReturnPolicy: [{ applicableCountry: ['US'] }] }] });
+  assert.equal(v.shippingRate, '3'); assert.equal(v.transitMin, '2'); assert.equal(v.transitMax, '2'); assert.equal(v.returnCountry, 'US');
+});
+test('product: shipping and return validation', () => {
+  const fields = byId('product').fields;
+  const errs = (o) => validate(fields, { ...defaults('product'), ...o });
+  assert.ok(errs({ shippingRate: '3' }).shippingCurrency);
+  assert.ok(errs({ shippingCurrency: 'USD' }).shippingRate);
+  assert.ok(!errs({ shippingRate: '0', shippingCurrency: 'USD' }).shippingRate);
+  assert.ok(errs({ shippingCountry: 'bd' }).shippingCountry);
+  assert.ok(errs({ handlingMin: '1.5' }).handlingMin);
+  assert.ok(errs({ transitMin: '5', transitMax: '2' }).transitMax);
+  assert.ok(errs({ returnCategory: 'MerchantReturnFiniteReturnWindow' }).returnDays);
+  assert.ok(errs({ returnCategory: 'MerchantReturnNotPermitted', returnDays: '30' }).returnDays);
+  assert.ok(!errs({ returnCategory: 'MerchantReturnFiniteReturnWindow', returnDays: '30' }).returnDays);
+});
+
 test('breadcrumb: positions are sequential and the last url may be omitted', () => {
   const j = build('breadcrumb', { items: [{ name: 'Home', url: 'https://a.com/' }, { name: '', url: '' }, { name: 'Post', url: '' }] });
   assert.deepEqual(j.itemListElement.map((x) => x.position), [1, 2]);
