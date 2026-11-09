@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Product: merchant listing fields for shipping (`offers.shippingDetails` with rate, destination, handling and transit days) and returns (`offers.hasMerchantReturnPolicy` with category, window, country, method and fees), including import support.
 - "Minify output" toggle for the copied and downloaded JSON-LD (single line, no whitespace).
 
 ### Fixed
