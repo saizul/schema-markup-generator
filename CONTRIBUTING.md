@@ -21,6 +21,7 @@ python3 -m http.server 8080 # or any static server, then open http://localhost:8
 | `assets/js/graph.js` | `@graph` builder and `@id` wiring |
 | `assets/js/lint.js` | Required/recommended property checker |
 | `assets/js/extract.js`, `importer.js` | Page HTML and JSON-LD import |
+| `assets/js/markup.js` | Microdata and RDFa output built from the JSON-LD document |
 | `assets/js/share.js`, `i18n.js`, `templates.js` | URL sharing, translations, presets |
 | `assets/js/app.js` | The only file that touches the DOM |
 | `tests/` | `node --test` suites |

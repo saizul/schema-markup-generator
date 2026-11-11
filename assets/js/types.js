@@ -66,5 +66,6 @@
  * @property {{base: string, entities: GraphEntity[], active: number}} graph
  * @property {boolean} wrap
  * @property {boolean} minify
+ * @property {'jsonld'|'microdata'|'rdfa'} format  Output syntax.
  */
 export {};

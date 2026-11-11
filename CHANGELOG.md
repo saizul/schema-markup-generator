@@ -7,6 +7,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 - Product: merchant listing fields for shipping (`offers.shippingDetails` with rate, destination, handling and transit days) and returns (`offers.hasMerchantReturnPolicy` with category, window, country, method and fees), including import support.
+- "Output format" selector: the generated document can be shown, copied and downloaded as Microdata (`itemscope` / `itemprop`) or RDFa Lite (`vocab` / `typeof` / `property`) in addition to JSON-LD. Works for single schemas and `@graph` documents, keeps `@id` links between entities and honours "Minify output".
 - "Minify output" toggle for the copied and downloaded JSON-LD (single line, no whitespace).
 
 ### Fixed

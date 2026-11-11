@@ -7,6 +7,7 @@ import { t as tr, tl as trl } from './i18n.js';
 import { TEMPLATES, applyTemplate } from './templates.js';
 import { toHash, fromHash } from './share.js';
 import { parseInput, toStatePatch } from './importer.js';
+import { FORMATS, toMarkup, fileInfo } from './markup.js';
 
 const KEY = 'schema-markup-generator:v2';
 const THEME_KEY = 'schema-markup-generator:theme';
@@ -21,7 +22,7 @@ const store = {
 /** @returns {import('./types.js').AppState} */
 const fresh = () => ({
   lang: (navigator.language || '').startsWith('bn') ? 'bn' : 'en',
-  mode: 'single', type: 'article', values: {}, graph: { base: '', entities: [], active: 0 }, wrap: true, minify: false,
+  mode: 'single', type: 'article', values: {}, graph: { base: '', entities: [], active: 0 }, wrap: true, minify: false, format: 'jsonld',
 });
 
 function sanitize(s) {
@@ -39,6 +40,7 @@ function sanitize(s) {
   out.lang = out.lang === 'bn' ? 'bn' : 'en';
   out.wrap = out.wrap !== false;
   out.minify = out.minify === true;
+  out.format = FORMATS.includes(out.format) ? out.format : 'jsonld';
   return out;
 }
 
@@ -97,6 +99,9 @@ function renderChrome() {
   $('#lang').value = state.lang;
   $('#wrap').checked = state.wrap;
   $('#minify').checked = state.minify;
+  $('#format').value = state.format;
+  $('#wrap').disabled = state.format !== 'jsonld';
+  $('#download').textContent = T(state.format === 'jsonld' ? 'out.download' : 'out.downloadHtml');
   document.querySelectorAll('input[name="mode"]').forEach((r) => { r.checked = r.value === state.mode; });
 
   const tpl = $('#template');
@@ -248,12 +253,19 @@ function renderFieldFeedback(entityIssues, fieldErrorMap) {
   });
 }
 
+/** Output text in the selected format; the script wrapper only applies to JSON-LD. */
+function serialize(json, wrap) {
+  const opts = { minify: state.minify };
+  if (state.format !== 'jsonld') return toMarkup(json, state.format, opts);
+  return wrap ? toScriptTag(json, opts) : toJson(json, opts);
+}
+
 function update() {
   const { schema, values } = current();
   const fieldErrorMap = validate(schema.fields, values);
   const { json, entityIssues, fieldErrors } = compute();
   const empty = isEmpty(json);
-  $('#out').textContent = empty ? '' : state.wrap ? toScriptTag(json, { minify: state.minify }) : toJson(json, { minify: state.minify });
+  $('#out').textContent = empty ? '' : serialize(json, state.wrap);
   $('#out-empty').hidden = !empty;
   $('#download').disabled = $('#copy').disabled = $('#share').disabled = false;
 
@@ -407,6 +419,7 @@ $('#template').addEventListener('change', (e) => {
 
 $('#wrap').addEventListener('change', (e) => { state.wrap = e.target.checked; update(); });
 $('#minify').addEventListener('change', (e) => { state.minify = e.target.checked; update(); });
+$('#format').addEventListener('change', (e) => { state.format = e.target.value; renderChrome(); update(); });
 $('#lang').addEventListener('change', (e) => { state.lang = e.target.value; renderAll(); });
 
 $('#copy').addEventListener('click', async () => {
@@ -422,7 +435,8 @@ $('#download').addEventListener('click', () => {
   showAll = true;
   const json = update();
   const name = state.mode === 'graph' ? 'graph' : state.type;
-  const a = h('a', { download: `schema-${name}.json`, href: URL.createObjectURL(new Blob([toJson(json, { minify: state.minify })], { type: 'application/json' })) });
+  const { ext, mime } = fileInfo(state.format);
+  const a = h('a', { download: `schema-${name}.${ext}`, href: URL.createObjectURL(new Blob([serialize(json, false)], { type: mime })) });
   document.body.append(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
