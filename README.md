@@ -30,6 +30,8 @@ The included workflow (`.github/workflows/ci.yml`) can also run the tests and de
   two graph presets.
 - **Import**: paste JSON-LD, a `<script>` block, or the full HTML of a page. JSON-LD blocks and basic microdata
   (`itemscope`, `itemtype`, `itemprop`) are extracted and loaded into the form.
+- **Microdata and RDFa output**: switch the output format to get the same data as inline HTML markup instead of
+  JSON-LD (see [Output formats](#output-formats)).
 - **Share**: the form state is stored in the URL hash, so a link restores your work.
 - **English and Bangla** interface.
 - Copy button, download as `.json`, optional `<script type="application/ld+json">` wrapper, and links to the
@@ -37,6 +39,35 @@ The included workflow (`.github/workflows/ci.yml`) can also run the tests and de
   [Schema.org validator](https://validator.schema.org/).
 - Dark and light theme (follows `prefers-color-scheme`, with a toggle), responsive layout, keyboard friendly,
   state saved in `localStorage` (failures are ignored).
+
+## Output formats
+
+JSON-LD is the format Google recommends and stays the default. The "Output format" selector next to the copy buttons
+converts the generated document to two other syntaxes that search engines read:
+
+| Format | Markup | Download |
+| --- | --- | --- |
+| JSON-LD | `<script type="application/ld+json">` block | `.json` |
+| Microdata | `itemscope`, `itemtype`, `itemprop`, `itemid` | `.html` |
+| RDFa | `vocab`, `typeof`, `property`, `resource` (RDFa Lite) | `.html` |
+
+Microdata and RDFa are written as invisible `<meta>` and `<link>` elements inside nested `<div>` blocks, so the snippet
+can be pasted anywhere in the page `<body>` (useful for page builders and platforms that strip `<script>` tags):
+
+```html
+<div itemscope itemtype="https://schema.org/Article">
+  <meta itemprop="headline" content="How to brew tea">
+  <link itemprop="image" href="https://example.com/tea.jpg">
+  <div itemprop="author" itemscope itemtype="https://schema.org/Person">
+    <meta itemprop="name" content="Rahim Uddin">
+  </div>
+</div>
+```
+
+URLs become `<link>` elements and every other value a `<meta>` element. In graph mode each entity is a top-level
+block; `@id` values are kept as `itemid` / `resource` and references between entities point at them. "Minify output"
+applies to all formats, while the script wrapper only applies to JSON-LD. The conversion lives in
+`assets/js/markup.js` (`toMicrodata`, `toRdfa`) and is covered by tests that read the microdata back with the importer.
 
 ## Run locally
 
@@ -66,6 +97,7 @@ assets/js/graph.js          @graph builder
 assets/js/lint.js           required / recommended checker
 assets/js/extract.js        HTML, JSON-LD and microdata extraction
 assets/js/importer.js       pasted markup to form state
+assets/js/markup.js         Microdata and RDFa output
 assets/js/share.js          URL hash encoding
 assets/js/i18n.js           English and Bangla strings
 assets/js/templates.js      presets
