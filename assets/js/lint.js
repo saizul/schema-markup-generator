@@ -1,5 +1,6 @@
 // Built-in structured data checker. Pure: takes rule tables from the schema modules and a JSON-LD node.
 import { isEmpty } from './schemas/util.js';
+import { checkConsistency } from './consistency.js';
 
 const isRef = (o) => o && typeof o === 'object' && !Array.isArray(o) && Object.keys(o).length === 1 && '@id' in o;
 
@@ -18,9 +19,11 @@ export const has = (node, path) => present(node, path.replace(/\[\]/g, '').split
 /**
  * @param {import('./types.js').Rules} rules
  * @param {Object} node JSON-LD node (with or without @context)
+ * @param {{now?: number|Date, consistency?: boolean}} [opts] `now` drives expiry checks; set `consistency: false`
+ *   to skip the cross-value consistency checks.
  * @returns {import('./types.js').LintIssue[]}
  */
-export function lintNode(rules, node) {
+export function lintNode(rules, node, opts = {}) {
   const issues = [];
   const missing = [];
   const covered = (p) => missing.some((q) => p.startsWith(q + '.') || p.startsWith(q + '[]'));
@@ -42,6 +45,7 @@ export function lintNode(rules, node) {
     }
   }
   if (rules.extra && !isEmpty(n)) issues.push(...rules.extra(n));
+  if (opts.consistency !== false && !isEmpty(n)) issues.push(...checkConsistency(n, opts));
   for (const code of rules.info || []) issues.push({ severity: 'info', code });
   return issues;
 }

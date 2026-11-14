@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test
+      - run: node --test tests/*.test.js
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

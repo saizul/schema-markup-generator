@@ -24,6 +24,8 @@ The included workflow (`.github/workflows/ci.yml`) can also run the tests and de
 - **Built-in checker** based on the Google structured data documentation: required properties are errors,
   recommended ones are warnings, and notes explain retired or restricted rich results. Messages also appear next to
   the related form field.
+- **Consistency checks**: values that are valid on their own but contradict each other are caught too (see
+  [Consistency checks](#consistency-checks)).
 - **Field validation**: required markers, URL, ISO 8601 date and duration, time, currency, email and number checks.
   Empty fields are omitted from the output.
 - **Templates**: "Blog post", "Local shop in Dhaka", "SaaS product", FAQ, product, event, recipe, job, course, video and
@@ -69,6 +71,32 @@ block; `@id` values are kept as `itemid` / `resource` and references between ent
 applies to all formats, while the script wrapper only applies to JSON-LD. The conversion lives in
 `assets/js/markup.js` (`toMicrodata`, `toRdfa`) and is covered by tests that read the microdata back with the importer.
 
+## Consistency checks
+
+The form validators look at one field at a time. The checker also compares related values anywhere in the
+document, including imported markup and every entity of a `@graph`:
+
+| Code | Severity | Example |
+| --- | --- | --- |
+| `date-order` | error | `endDate` before `startDate`, `dateModified` before `datePublished`, `validThrough` before `datePosted`, `priceValidUntil` before `validFrom` |
+| `date-expired` | warning | `validThrough`, `priceValidUntil` or `expires` already in the past |
+| `offer-after-start` | warning | Event tickets go on sale (`offers.validFrom`) after the event starts |
+| `rating-range` | error | `ratingValue` outside `worstRating` to `bestRating` (defaults 1 and 5) |
+| `rating-scale` | error | `bestRating` not greater than `worstRating` |
+| `range-order` | error | `minValue` above `maxValue` (salary, handling and transit days) or `lowPrice` above `highPrice` |
+| `negative-value` | error | negative `price`, `ratingCount`, `reviewCount`, `merchantReturnDays` and similar |
+
+Dates are compared as ISO 8601 values with their UTC offsets. When one side has no time part only the calendar day
+is compared, so an event that starts `2026-09-12T17:00:00+06:00` and ends `2026-09-12` is accepted. Expiry is
+measured against today's date in UTC. The checks live in `assets/js/consistency.js` and can be called directly:
+
+```js
+import { checkConsistency } from './assets/js/consistency.js';
+checkConsistency(node, { now: Date.parse('2026-06-15') }); // -> [{ severity, code, path, params }]
+```
+
+`lintNode(rules, node, { now, consistency: false })` skips them when only the property checks are wanted.
+
 ## Run locally
 
 Use any static file server. ES modules do not load from `file://`.
@@ -84,7 +112,7 @@ The JSON builders, validators, checker, graph wiring, importer, sharing and i18n
 Node test runner (Node 20 or newer, no packages needed):
 
 ```bash
-node --test
+npm test                    # same as: node --test tests/*.test.js
 ```
 
 ## Project layout
@@ -95,6 +123,7 @@ assets/css/style.css
 assets/js/app.js            UI only
 assets/js/graph.js          @graph builder
 assets/js/lint.js           required / recommended checker
+assets/js/consistency.js    date order, expiry, rating and range checks
 assets/js/extract.js        HTML, JSON-LD and microdata extraction
 assets/js/importer.js       pasted markup to form state
 assets/js/markup.js         Microdata and RDFa output

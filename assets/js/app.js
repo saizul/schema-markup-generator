@@ -218,7 +218,7 @@ function compute() {
   return { json, entityIssues: [{ index: 0, type: schema.id, issues: lintNode(schema.rules, json) }], fieldErrors: Object.keys(validate(schema.fields, values)).length };
 }
 
-const issueText = (i) => T('lint.' + i.code, { path: i.path || '', paths: (i.paths || []).join(', '), n: i.params?.n ?? '' });
+const issueText = (i) => T('lint.' + i.code, { n: '', ...i.params, path: i.path || '', paths: (i.paths || []).join(', ') });
 
 function renderChecks(entityIssues) {
   const box = $('#checks');
