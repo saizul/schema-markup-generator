@@ -36,6 +36,7 @@
  * @property {string} code           missing-required | missing-recommended | one-of | or a custom code.
  * @property {string} [path]
  * @property {string[]} [paths]
+ * @property {Object<string, string|number>} [params] Values interpolated into the message, e.g. { a, b } for date-order.
  */
 
 /**

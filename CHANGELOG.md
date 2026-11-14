@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Consistency checks in the built-in checker (`assets/js/consistency.js`): end dates before start dates, `dateModified` before `datePublished`, `validThrough` before `datePosted`, expired `validThrough` / `priceValidUntil`, Event tickets on sale after the start, ratings outside the `worstRating` / `bestRating` scale, inverted `minValue` / `maxValue` and `lowPrice` / `highPrice` ranges, and negative prices or counts. They run on single schemas, every `@graph` entity and imported markup, with English and Bangla messages.
+- `lintNode(rules, node, opts)` and `lintGraph(input, opts)` accept `{ now, consistency }` so expiry checks are deterministic and the new checks can be turned off.
+
+### Changed
+- CI and `npm test` pass the test files to `node --test` explicitly (`tests/*.test.js`).
 - Product: merchant listing fields for shipping (`offers.shippingDetails` with rate, destination, handling and transit days) and returns (`offers.hasMerchantReturnPolicy` with category, window, country, method and fees), including import support.
 - "Output format" selector: the generated document can be shown, copied and downloaded as Microdata (`itemscope` / `itemprop`) or RDFa Lite (`vocab` / `typeof` / `property`) in addition to JSON-LD. Works for single schemas and `@graph` documents, keeps `@id` links between entities and honours "Minify output".
 - "Minify output" toggle for the copied and downloaded JSON-LD (single line, no whitespace).

@@ -8,7 +8,7 @@ so you only need a text editor and Node.js 20 or newer for the tests.
 ```bash
 git clone <your fork>
 cd schema-markup-generator
-node --test                 # run the unit tests
+node --test tests/*.test.js # run the unit tests
 python3 -m http.server 8080 # or any static server, then open http://localhost:8080
 ```
 
@@ -20,6 +20,7 @@ python3 -m http.server 8080 # or any static server, then open http://localhost:8
 | `assets/js/schemas/util.js` | Pure helpers and validators shared by the modules |
 | `assets/js/graph.js` | `@graph` builder and `@id` wiring |
 | `assets/js/lint.js` | Required/recommended property checker |
+| `assets/js/consistency.js` | Cross-value checks (date order, expiry, rating scale, ranges) |
 | `assets/js/extract.js`, `importer.js` | Page HTML and JSON-LD import |
 | `assets/js/markup.js` | Microdata and RDFa output built from the JSON-LD document |
 | `assets/js/share.js`, `i18n.js`, `templates.js` | URL sharing, translations, presets |
@@ -46,7 +47,7 @@ python3 -m http.server 8080 # or any static server, then open http://localhost:8
 - Only emit properties that schema.org or Google documents. Prefer omitting a field over guessing.
 - Keep the UI accessible: every control needs a label, and state must not rely on colour alone.
 - New UI strings need English and Bangla entries (the i18n test fails if the key sets differ).
-- Run `node --test` before opening a pull request and describe the Google documentation your change follows.
+- Run `npm test` (or `node --test tests/*.test.js`) before opening a pull request and describe the Google documentation your change follows.
 
 ## Reporting issues
 

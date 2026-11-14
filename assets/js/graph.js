@@ -71,10 +71,10 @@ export function buildGraph(input) {
  * Lints each entity of a graph with its schema's rule table.
  * @returns {{index: number, type: string, issues: import('./types.js').LintIssue[]}[]}
  */
-export function lintGraph(input) {
+export function lintGraph(input, opts = {}) {
   const { nodes } = buildGraphDetailed(input);
   return input.entities.map((e, index) => {
     const schema = byId(e.type);
-    return { index, type: e.type, issues: schema ? lintNode(schema.rules, nodes[index] || {}) : [] };
+    return { index, type: e.type, issues: schema ? lintNode(schema.rules, nodes[index] || {}, opts) : [] };
   });
 }
